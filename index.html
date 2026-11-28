@@ -68,6 +68,10 @@
       margin: 5px;
       border-radius: 5px;
     }
+    .login-card { max-width: 420px; margin: 20px auto; }
+    .login-card input { width: 100%; box-sizing: border-box; padding: 10px; }
+    .login-error { color: crimson; font-weight: bold; }
+    .admin-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
     footer { text-align: center; padding: 15px; color: #555; }
   </style>
 </head>
@@ -87,7 +91,7 @@
     <a href="#mybookings">All Bookings</a>
     <a href="#history">Usage History</a>
     <a href="#notifications">Notifications</a>
-    <a href="#admin">Admin Dashboard</a>
+    <a href="#adminLogin">Admin Login</a>
   </nav>
 
   <!-- ================= 1. RESOURCE CATALOGUE ================= -->
@@ -176,9 +180,26 @@
     <ul id="notificationList"></ul>
   </section>
 
+  <!-- ================= ADMIN LOGIN ================= -->
+  <section id="adminLogin" class="login-card">
+    <h2>Admin Login</h2>
+    <p>Only the administrator should use this section to manage booking requests.</p>
+    <form onsubmit="event.preventDefault(); loginAdmin();">
+      <label for="adminUsername">Username:</label>
+      <input type="text" id="adminUsername" autocomplete="username" required>
+      <label for="adminPassword">Password:</label>
+      <input type="password" id="adminPassword" autocomplete="current-password" required>
+      <button type="submit">Login to Admin Dashboard</button>
+    </form>
+    <p id="adminLoginMessage" class="login-error" role="alert"></p>
+  </section>
+
   <!-- ================= 7. ADMIN DASHBOARD ================= -->
-  <section id="admin">
-    <h2>7. Admin Dashboard</h2>
+  <section id="admin" style="display:none;">
+    <div class="admin-top">
+      <h2>7. Admin Dashboard</h2>
+      <button type="button" onclick="logoutAdmin()">Logout</button>
+    </div>
     <div class="stats" id="statsBox"></div>
 
     <h3>Pending Requests</h3>
@@ -392,8 +413,43 @@
       document.getElementById("notificationList").innerHTML = html;
     }
 
+    // ---------- ADMIN LOGIN (FRONT-END DEMO ONLY) ----------
+    // Demo credentials: admin / LPU@123
+    // This client-side check is for classroom demonstration only.
+    // It is NOT secure authentication because credentials are visible in source code.
+    var adminLoggedIn = false;
+
+    function loginAdmin() {
+      var username = document.getElementById("adminUsername").value.trim();
+      var password = document.getElementById("adminPassword").value;
+      var message = document.getElementById("adminLoginMessage");
+
+      if (username === "admin" && password === "LPU@123") {
+        adminLoggedIn = true;
+        document.getElementById("adminLogin").style.display = "none";
+        document.getElementById("admin").style.display = "block";
+        message.textContent = "";
+        document.getElementById("adminPassword").value = "";
+        showAdmin();
+        document.getElementById("admin").scrollIntoView({ behavior: "smooth" });
+      } else {
+        message.textContent = "Incorrect username or password. Please try again.";
+      }
+    }
+
+    function logoutAdmin() {
+      adminLoggedIn = false;
+      document.getElementById("admin").style.display = "none";
+      document.getElementById("adminLogin").style.display = "block";
+      document.getElementById("adminUsername").value = "";
+      document.getElementById("adminPassword").value = "";
+      document.getElementById("adminLoginMessage").textContent = "";
+      document.getElementById("adminLogin").scrollIntoView({ behavior: "smooth" });
+    }
+
     // ---------- ADMIN DASHBOARD ----------
     function showAdmin() {
+      if (!adminLoggedIn) { return; }
       var pending = 0, approved = 0, rejected = 0;
       var html = "";
 
